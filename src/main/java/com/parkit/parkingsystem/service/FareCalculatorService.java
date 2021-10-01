@@ -22,17 +22,28 @@ public class FareCalculatorService {
 
         //TODO: Some tests are failing here. Need to check if this logic is correct
         float duration = (outHour - inHour) / 3_600_000.0f;
-        double roundDuration = convert.roundFloatToHundred(duration);
+
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {
-                ticket.setPrice(roundDuration * Fare.CAR_RATE_PER_HOUR);
+                ticket.setPrice(calculatePrice(duration,Fare.CAR_RATE_PER_HOUR));
                 break;
             }
             case BIKE: {
-                ticket.setPrice(roundDuration * Fare.BIKE_RATE_PER_HOUR);
+                ticket.setPrice(calculatePrice(duration,Fare.BIKE_RATE_PER_HOUR));
                 break;
             }
             default: throw new IllegalArgumentException("Unkown Parking Type");
         }
+    }
+
+    public double calculatePrice(float durationInHours, double pricing ){
+        double finalPrice;
+        if (durationInHours <= freeDurationInHours){
+            finalPrice = 0;
+        }
+        else {
+            finalPrice = durationInHours*pricing;
+        }
+        return convert.roundDoubleToHundred(finalPrice);
     }
 }
