@@ -14,8 +14,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.util.Date;
+
+import static java.lang.Double.parseDouble;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 public class ParkingDataBaseIT {
 
@@ -23,7 +30,11 @@ public class ParkingDataBaseIT {
     private static ParkingSpotDAO parkingSpotDAO;
     private static TicketDAO ticketDAO;
     private static DataBasePrepareService dataBasePrepareService;
-    private static final String vehicleRegNumberTest = "ABCDEF";
+    private static final String vehicleRegNumberTest = "012345";
+    private static final Integer parkedTimeInMinutes = 60;
+    private static final Integer parkedTimeInMillis = parkedTimeInMinutes*60*1000;
+
+
     @Mock
     private static InputReaderUtil inputReaderUtil;
 
@@ -39,7 +50,7 @@ public class ParkingDataBaseIT {
     @BeforeEach
     private void setUpPerTest() throws Exception {
         when(inputReaderUtil.readSelection()).thenReturn(1);
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(vehicleRegNumberTest);
         dataBasePrepareService.clearDataBaseEntries();
     }
 
@@ -50,8 +61,9 @@ public class ParkingDataBaseIT {
 
     @Test
     public void testParkingACar(){
+        Date inTime = new Date(System.currentTimeMillis() - parkedTimeInMillis);
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processIncomingVehicle();
+        parkingService.processIncomingVehicle(inTime);
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
         assertNotNull(ticketTest);
         assertEquals(vehicleRegNumberTest, ticketTest.getVehicleRegNumber());
@@ -63,8 +75,30 @@ public class ParkingDataBaseIT {
     public void testParkingLotExit(){
         testParkingACar();
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processExitingVehicle();
+        Date outTime = new Date();
+        parkingService.processExitingVehicle(outTime);
+        Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        assertNotNull(ticketTest);
+        assertEquals(ticketTest.getPrice(), calculateFar(ticketTest));
+        assertEquals(convertDate(ticketTest.getOutTime()), convertDate(outTime));
         //TODO: check that the fare generated and out time are populated correctly in the database
     }
 
+    private double calculateFar(Ticket ticket){
+        long inHour = ticket.getInTime().getTime();
+        long outHour = ticket.getOutTime().getTime();
+        float duration = (outHour - inHour) / 3_600_000.0f;
+        return roundToHundred(duration) * 1.5;
+    }
+
+    public double roundToHundred(float floatToRound){
+        DecimalFormat roundTwoAfter = new DecimalFormat();
+        roundTwoAfter.setMaximumFractionDigits ( 2 ) ;
+        return parseDouble(roundTwoAfter.format(floatToRound));
+    }
+
+    public String convertDate(Date dateToFormat){
+        DateFormat shortDateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+        return shortDateFormat.format(dateToFormat);
+    }
 }
