@@ -1,5 +1,6 @@
 package com.parkit.parkingsystem.integration;
 
+import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
@@ -89,6 +90,6 @@ public class ParkingDataBaseIT {
         long inHour = ticket.getInTime().getTime();
         long outHour = ticket.getOutTime().getTime();
         float duration = (outHour - inHour) / 3_600_000.0f;
-        return convert.roundFloatToHundred(duration) * 1.5;
+        return convert.roundDoubleToHundred(duration*Fare.CAR_RATE_PER_HOUR);
     }
 }
