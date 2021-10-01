@@ -6,6 +6,7 @@ import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
+import com.parkit.parkingsystem.util.Convert;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ParkingDataBaseIT {
-
+    private static final Convert convert = new Convert();
     private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     private static ParkingSpotDAO parkingSpotDAO;
     private static TicketDAO ticketDAO;
@@ -80,7 +81,7 @@ public class ParkingDataBaseIT {
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
         assertNotNull(ticketTest);
         assertEquals(ticketTest.getPrice(), calculateFar(ticketTest));
-        assertEquals(convertDate(ticketTest.getOutTime()), convertDate(outTime));
+        assertEquals(convert.convertDateToShortString(ticketTest.getOutTime()), convert.convertDateToShortString(outTime));
         //TODO: check that the fare generated and out time are populated correctly in the database
     }
 
@@ -88,17 +89,6 @@ public class ParkingDataBaseIT {
         long inHour = ticket.getInTime().getTime();
         long outHour = ticket.getOutTime().getTime();
         float duration = (outHour - inHour) / 3_600_000.0f;
-        return roundToHundred(duration) * 1.5;
-    }
-
-    public double roundToHundred(float floatToRound){
-        DecimalFormat roundTwoAfter = new DecimalFormat();
-        roundTwoAfter.setMaximumFractionDigits ( 2 ) ;
-        return parseDouble(roundTwoAfter.format(floatToRound));
-    }
-
-    public String convertDate(Date dateToFormat){
-        DateFormat shortDateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-        return shortDateFormat.format(dateToFormat);
+        return convert.roundFloatToHundred(duration) * 1.5;
     }
 }
