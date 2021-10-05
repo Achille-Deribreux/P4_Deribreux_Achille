@@ -9,8 +9,6 @@ import static java.lang.Double.parseDouble;
 
 public class FareCalculatorService {
     private static final Convert convert = new Convert();
-    private static final int freeDurationInMinutes = 30;
-    private static final int freeDurationInHours = freeDurationInMinutes/60;
 
     public void calculateFare(Ticket ticket){
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
@@ -38,7 +36,7 @@ public class FareCalculatorService {
 
     public double calculatePrice(float durationInHours, double pricing ){
         double finalPrice;
-        if (durationInHours <= freeDurationInHours){
+        if (durationInHours <= Fare.FREE_PARKING_TIME_IN_HOURS){
             finalPrice = 0;
         }
         else {

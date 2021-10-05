@@ -26,9 +26,9 @@ public class ParkingService {
         this.parkingSpotDAO = parkingSpotDAO;
         this.ticketDAO = ticketDAO;
     }
-    public void processIncomingVehicle(){
+    /*public void processIncomingVehicle(){
         processIncomingVehicle(new Date());
-    }
+    }*/
     public void processIncomingVehicle(final Date inTime) {
         try{
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
