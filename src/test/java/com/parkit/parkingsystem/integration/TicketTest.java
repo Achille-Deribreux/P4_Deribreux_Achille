@@ -18,7 +18,7 @@ public class TicketTest {
     @Test
     public void ticketSetAndGetTest(){
         ticket.setId(12);
-        ticket.setVehicleRegNumber("ABCDEF");
+        ticket.setVehicleRegNumber("012345");
         ParkingSpot parkingSpot = new ParkingSpot(10, ParkingType.CAR, true);
         ticket.setParkingSpot(parkingSpot);
         ticket.setPrice(10);
@@ -28,7 +28,7 @@ public class TicketTest {
         ticket.setOutTime(outTime);
         assertEquals(12, ticket.getId());
         assertSame(parkingSpot, ticket.getParkingSpot());
-        assertEquals("ABCDEF", ticket.getVehicleRegNumber());
+        assertEquals("012345", ticket.getVehicleRegNumber());
         assertEquals(10, ticket.getPrice());
         assertEquals(convert.convertDateToShortString(inTime),convert.convertDateToShortString(ticket.getInTime()));
         assertEquals(convert.convertDateToShortString(outTime),convert.convertDateToShortString(ticket.getOutTime()));
