@@ -28,11 +28,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class ParkingDataBaseIT {
     private static final Convert convert = new Convert();
-    private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
+    private static final DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     private static ParkingSpotDAO parkingSpotDAO;
     private static TicketDAO ticketDAO;
     private static DataBasePrepareService dataBasePrepareService;
-    private static final String vehicleRegNumberTest = "012345";
+    private static final String vehicleRegNumberTest = "0123456";
     private static final Integer parkedTimeInMinutes = 60;
     private static final Integer parkedTimeInMillis = parkedTimeInMinutes*60*1000;
 
@@ -63,9 +63,8 @@ public class ParkingDataBaseIT {
 
     @Test
     public void testParkingACar(){
-        Date inTime = new Date(System.currentTimeMillis() - parkedTimeInMillis);
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processIncomingVehicle(inTime);
+        parkingService.processIncomingVehicle();
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
         assertNotNull(ticketTest);
         assertEquals(vehicleRegNumberTest, ticketTest.getVehicleRegNumber());
@@ -78,11 +77,12 @@ public class ParkingDataBaseIT {
         testParkingACar();
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         Date outTime = new Date();
+        outTime.setTime(System.currentTimeMillis()+(60*60*1000));
         parkingService.processExitingVehicle(outTime);
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
-        assertNotNull(ticketTest);
+        assertNotNull(outTime);
         assertEquals(ticketTest.getPrice(), calculateFar(ticketTest));
-        assertEquals(convert.convertDateToShortString(ticketTest.getOutTime()), convert.convertDateToShortString(outTime));
+        assertEquals(convert.convertDateToShortString(outTime),convert.convertDateToShortString(ticketTest.getOutTime()));
         //TODO: check that the fare generated and out time are populated correctly in the database
     }
 
