@@ -7,7 +7,7 @@ import com.parkit.parkingsystem.util.Convert;
 
 public class FareCalculatorService {
     private static final Convert convert = new Convert();
-    private static TicketDAO ticketDAO = new TicketDAO();;
+    public static TicketDAO ticketDAO = new TicketDAO();;
 
     public void calculateFare(Ticket ticket){
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
