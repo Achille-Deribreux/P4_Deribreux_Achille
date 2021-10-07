@@ -2,9 +2,11 @@ package com.parkit.parkingsystem;
 
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
+import com.parkit.parkingsystem.service.ParkingService;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ParkingSpotTest {
 
