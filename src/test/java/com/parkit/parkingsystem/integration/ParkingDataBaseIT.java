@@ -86,6 +86,11 @@ public class ParkingDataBaseIT {
         //TODO: check that the fare generated and out time are populated correctly in the database
     }
 
+    /*@Test void checkIfRecurrentUserTest(){
+        testParkingLotExit();
+        assertTrue(ticketDAO.checkIfRecurrentUser(vehicleRegNumberTest, 1));
+    }*/
+
     private double calculateFar(Ticket ticket){
         long inHour = ticket.getInTime().getTime();
         long outHour = ticket.getOutTime().getTime();
