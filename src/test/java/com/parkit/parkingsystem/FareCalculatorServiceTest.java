@@ -18,12 +18,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,9 +34,10 @@ import java.util.Date;
 @ExtendWith(MockitoExtension.class)
 public class FareCalculatorServiceTest {
     private static final Convert convert = new Convert();
-    private static final String vehicleRegNumberTest = "0123456";
+    private static final String vehicleRegNumberTest = "01234569";
     private static FareCalculatorService fareCalculatorService;
     private Ticket ticket;
+    private static final FareCalculatorService spy = spy(new FareCalculatorService());
     private static ParkingService parkingService;
 
     @Mock
@@ -208,9 +210,11 @@ public class FareCalculatorServiceTest {
         assertThrows(IllegalArgumentException.class,  () ->fareCalculatorService.calculateFare(ticket));
     }
 
-    //Test OK mais comment set dans la BD Test au lieu de prod ? 
     @Test
-    public void calculateFareWithDiscountTest(){
+    public void calculateFareCarWithDiscountTest(){
+        //Given
+        when(spy.getDiscountRecurrentUser(vehicleRegNumberTest)).thenReturn(5);
+
         Date inTime = new Date();
         inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000) );
         Date outTime = new Date();
@@ -219,33 +223,9 @@ public class FareCalculatorServiceTest {
         ticket.setInTime(inTime);
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
-        fareCalculatorService.calculateFare(ticket);
-        assertEquals(1.42 , ticket.getPrice());
-    }
-
-    @Test
-    public void getDiscountRecurrentUserTest(){
-        assertEquals(5, fareCalculatorService.getDiscountRecurrentUser(vehicleRegNumberTest));
-    }
-
-    private void setRegNumberIntoDB() {
-        try {
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(vehicleRegNumberTest);
-
-            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
-            Ticket ticket = new Ticket();
-            ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
-            ticket.setParkingSpot(parkingSpot);
-            ticket.setVehicleRegNumber(vehicleRegNumberTest);
-            when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
-            when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
-
-            when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
-
-            parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw  new RuntimeException("Failed to set up test mock objects");
-        }
+        //When
+        spy.calculateFare(ticket);
+        //Then
+        assertEquals(convert.roundDoubleToHundred(Fare.CAR_RATE_PER_HOUR*0.95) , ticket.getPrice());
     }
 }

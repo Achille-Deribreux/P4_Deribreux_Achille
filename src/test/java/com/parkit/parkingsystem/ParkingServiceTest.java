@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,8 +33,7 @@ public class ParkingServiceTest {
     @Mock
     private static TicketDAO ticketDAO;
 
-    @BeforeEach
-    private void setUpPerTest() {
+    private void processExitingVehicleTestSetup() {
         try {
             when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
@@ -56,7 +56,32 @@ public class ParkingServiceTest {
 
     @Test
     public void processExitingVehicleTest(){
+        processExitingVehicleTestSetup();
         parkingService.processExitingVehicle();
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+    }
+
+    //Renvoie une exception
+    @Test
+    public void getVehichleTypeThrowExceptionTest() {
+        when(inputReaderUtil.readSelection()).thenReturn(46);
+        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO);
+        assertThrows(IllegalArgumentException.class,  () -> parkingService.getVehichleType());
+    }
+
+    //getVehicleTypeCar
+    @Test
+    public void getVehichleTypeReturnCarTest() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO);
+        assertEquals(ParkingType.CAR,parkingService.getVehichleType());
+    }
+
+    //getVehicleTypeBike
+    @Test
+    public void getVehichleTypeReturnBikeTest() {
+        when(inputReaderUtil.readSelection()).thenReturn(2);
+        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO);
+        assertEquals(ParkingType.BIKE,parkingService.getVehichleType());
     }
 }
