@@ -3,6 +3,7 @@ package com.parkit.parkingsystem.integration;
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
+import com.parkit.parkingsystem.dao.RecurrentUserDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
@@ -36,8 +37,11 @@ public class ParkingDataBaseIT {
     private static final DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     private static ParkingSpotDAO parkingSpotDAO;
     private static TicketDAO ticketDAO;
+    private static RecurrentUserDAO recurrentUserDAO;
     private static DataBasePrepareService dataBasePrepareService;
     private static final String vehicleRegNumberTest = "1-RSV-008"; //PUT A NUMBER THAT ISN'T IN THE PROD DB
+    private static  ParkingService parkingService;
+    private static Date outTime;
 
     @Mock
     private static InputReaderUtil inputReaderUtil;
@@ -47,12 +51,16 @@ public class ParkingDataBaseIT {
         parkingSpotDAO = new ParkingSpotDAO();
         parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
         ticketDAO = new TicketDAO();
+        recurrentUserDAO = new RecurrentUserDAO();
+        recurrentUserDAO.dataBaseConfig = dataBaseTestConfig;
         ticketDAO.dataBaseConfig = dataBaseTestConfig;
         dataBasePrepareService = new DataBasePrepareService();
     }
 
     @BeforeEach
     private void setUpPerTest() throws Exception {
+        outTime = new Date();
+        parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(vehicleRegNumberTest);
         dataBasePrepareService.clearDataBaseEntries();
@@ -65,32 +73,39 @@ public class ParkingDataBaseIT {
 
     @Test
     public void testParkingACar(){
-        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        //Given
         parkingService.processIncomingVehicle();
+        //When
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        //Then
         assertNotNull(ticketTest);
         assertEquals(vehicleRegNumberTest, ticketTest.getVehicleRegNumber());
         assertFalse(ticketTest.getParkingSpot().isAvailable());
-        //TODO: check that a ticket is actualy saved in DB and Parking table is updated with availability
     }
 
     @Test
     public void testParkingLotExit(){
-        testParkingACar();
-        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        Date outTime = new Date();
+        //Given
+        parkingService.processIncomingVehicle();
         outTime.setTime(System.currentTimeMillis()+(120*60*1000));
+        //When
         parkingService.processExitingVehicle(outTime);
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        //Then
         assertNotNull(outTime);
         assertEquals((((float) 120/60)*Fare.CAR_RATE_PER_HOUR),ticketTest.getPrice());
         assertEquals(convert.convertDateToShortString(outTime),convert.convertDateToShortString(ticketTest.getOutTime()));
-        //TODO: check that the fare generated and out time are populated correctly in the database
     }
 
     @Test
     public void checkIfRecurrentUserTest(){
-        testParkingLotExit();
-        assertTrue(ticketDAO.checkIfRecurrentUser(vehicleRegNumberTest, 1));
+        //given
+        parkingService.processIncomingVehicle();
+        outTime.setTime(System.currentTimeMillis()+(120*60*1000));
+        //When
+        parkingService.processExitingVehicle(outTime);
+        //Then
+        assertTrue(recurrentUserDAO.checkIfRecurrentUser(vehicleRegNumberTest, 1));
     }
+    
 }

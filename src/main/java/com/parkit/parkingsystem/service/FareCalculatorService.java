@@ -1,13 +1,15 @@
 package com.parkit.parkingsystem.service;
 
 import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.dao.RecurrentUserDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.util.Convert;
 
 public class FareCalculatorService {
     private static final Convert convert = new Convert();
-    public static TicketDAO ticketDAO = new TicketDAO();;
+    public static TicketDAO ticketDAO = new TicketDAO();
+    public static RecurrentUserDAO recurrentUserDAO = new RecurrentUserDAO();
 
     public void calculateFare(Ticket ticket){
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
@@ -17,8 +19,6 @@ public class FareCalculatorService {
         long inHour = ticket.getInTime().getTime();
         long outHour = ticket.getOutTime().getTime();
         int discount = getDiscountRecurrentUser(ticket.getVehicleRegNumber());
-
-        //TODO: Some tests are failing here. Need to check if this logic is correct
         float duration = (outHour - inHour) / 3_600_000.0f;
 
         switch (ticket.getParkingSpot().getParkingType()){
@@ -47,7 +47,7 @@ public class FareCalculatorService {
 
     public int getDiscountRecurrentUser (String vehicleRegNumber){
         int discount;
-        if (ticketDAO.checkIfRecurrentUser(vehicleRegNumber, 1)){
+        if (recurrentUserDAO.checkIfRecurrentUser(vehicleRegNumber, 1)){
             discount = 5;
         }
         else {

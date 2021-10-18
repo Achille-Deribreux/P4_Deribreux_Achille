@@ -9,8 +9,6 @@ g
 7src/test/java/com/parkit/parkingsystem/ConvertTest.java,d/d/dd3796c3a454679a9d19abc1902be2e499322675
 †
 Vsrc/test/java/com/parkit/parkingsystem/integration/service/DataBasePrepareService.java,f/b/fbb2241be41cb3e33b3972a1e0455f171de532a4
-q
-Asrc/main/java/com/parkit/parkingsystem/config/DataBaseConfig.java,3/d/3dc6d1078af5e430ee41185cb7fa3aded8bacc0d
 r
 Bsrc/main/java/com/parkit/parkingsystem/service/ParkingService.java,3/0/3010778988e0a8c9498c5b9ccbb0c445bb7c8f19
 p

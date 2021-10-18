@@ -87,6 +87,7 @@ public class TicketDAO {
         return false;
     }
 
+    /*
     public boolean checkIfRecurrentUser(String vehicleRegNumber, int howManyToBeRecurrent){
         Connection con = null;
         try {
@@ -101,5 +102,5 @@ public class TicketDAO {
             dataBaseConfig.closeConnection(con);
         }
         return false;
-    }
+    }*/
 }
