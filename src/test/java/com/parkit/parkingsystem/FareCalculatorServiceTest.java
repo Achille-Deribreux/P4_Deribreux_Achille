@@ -195,21 +195,6 @@ public class FareCalculatorServiceTest {
         assertEquals( 0 , ticket.getPrice());
     }
 
-    //Ajouter OTHER DANS ParkingType ? Ou NullPointerException ?
-    //DELETE
-    @Test
-    public void calculateFareUnknownParkingType(){
-        Date inTime = new Date();
-        inTime.setTime( System.currentTimeMillis() - (  Fare.FREE_PARKING_TIME_IN_MINS * 60 * 1000) );
-        Date outTime = new Date();
-        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.OTHER,false);
-
-        ticket.setInTime(inTime);
-        ticket.setOutTime(outTime);
-        ticket.setParkingSpot(parkingSpot);
-        assertThrows(IllegalArgumentException.class,  () ->fareCalculatorService.calculateFare(ticket));
-    }
-
     @Test
     public void calculateFareCarWithDiscountTest(){
         //Given

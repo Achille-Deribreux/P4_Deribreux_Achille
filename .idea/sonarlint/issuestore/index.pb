@@ -15,9 +15,5 @@ r
 Bsrc/main/java/com/parkit/parkingsystem/service/ParkingService.java,3/0/3010778988e0a8c9498c5b9ccbb0c445bb7c8f19
 p
 @src/main/java/com/parkit/parkingsystem/util/InputReaderUtil.java,3/c/3c54d5d7febc45facabac5e0634ff9591a676a28
-m
-=src/main/java/com/parkit/parkingsystem/model/ParkingSpot.java,3/1/318986ef301ad062e600ed154b628f156483e6f7
-q
-Asrc/main/java/com/parkit/parkingsystem/constants/ParkingType.java,d/8/d8f01a22f362ded7d3c261a801b40e51fef59549
 Å
 Qsrc/test/java/com/parkit/parkingsystem/integration/config/DataBaseTestConfig.java,e/f/ef583a006ac57694e355febd2026c73c527460d9
