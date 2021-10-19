@@ -10,6 +10,7 @@ import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.Convert;
 import com.parkit.parkingsystem.util.InputReaderUtil;
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -109,12 +112,12 @@ public class ParkingDataBaseIT {
         parkingService.processExitingVehicle(outTime);
             //(second in)
         parkingService.processIncomingVehicle();
-        outTime.setTime(System.currentTimeMillis()+(180*60*1000));
+        outTime.setTime(System.currentTimeMillis()+(60*60*1000));
         //When
         parkingService.processExitingVehicle(outTime);
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
         //Then
-        assertEquals(convert.roundDoubleToHundred((3 * Fare.CAR_RATE_PER_HOUR) * 0.95), ticketTest.getPrice());
+        assertEquals(convert.roundDoubleToHundred((Fare.CAR_RATE_PER_HOUR) * 0.95), ticketTest.getPrice());
     }
 
     @Test
@@ -139,6 +142,18 @@ public class ParkingDataBaseIT {
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
         //Then
         assertEquals(0, ticketTest.getPrice());
+    }
+
+    @Test
+    public void calculateFarMoreThanADayParkingTest(){
+        //Given
+        parkingService.processIncomingVehicle();
+        outTime.setTime(System.currentTimeMillis()+(30*60*60*1000));
+        //When
+        parkingService.processExitingVehicle(outTime);
+        Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        //Then
+        assertEquals(30*Fare.CAR_RATE_PER_HOUR, ticketTest.getPrice());
     }
 
     @Test

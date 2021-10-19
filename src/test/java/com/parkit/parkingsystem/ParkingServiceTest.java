@@ -59,32 +59,42 @@ public class ParkingServiceTest {
 
     @Test
     public void processExitingVehicleTest(){
+        //Given
         processExitingVehicleTestSetup();
+        //When
         parkingService.processExitingVehicle();
+        //Then
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 
-    //Renvoie une exception
     @Test
     public void getVehichleTypeThrowExceptionTest() {
-        when(inputReaderUtil.readSelection()).thenReturn(46);
+        //Given
         ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO, fareCalculatorService);
+        //When
+        when(inputReaderUtil.readSelection()).thenReturn(46);
+        //Then
         assertThrows(IllegalArgumentException.class,  () -> parkingService.getVehichleType());
     }
 
-    //getVehicleTypeCar
     @Test
     public void getVehichleTypeReturnCarTest() {
-        when(inputReaderUtil.readSelection()).thenReturn(1);
+        //Given
         ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO, fareCalculatorService);
+        //When
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        //Then
         assertEquals(ParkingType.CAR,parkingService.getVehichleType());
     }
 
     //getVehicleTypeBike
     @Test
     public void getVehichleTypeReturnBikeTest() {
-        when(inputReaderUtil.readSelection()).thenReturn(2);
+        //Given
         ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO, fareCalculatorService);
+        //When
+        when(inputReaderUtil.readSelection()).thenReturn(2);
+        //Then
         assertEquals(ParkingType.BIKE,parkingService.getVehichleType());
     }
 }
