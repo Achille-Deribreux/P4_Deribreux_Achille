@@ -91,7 +91,7 @@ public class ParkingDataBaseIT {
 
     @Test
     public void checkIfRecurrentUserTest(){
-        //given
+        //Given
         parkingService.processIncomingVehicle();
         outTime.setTime(System.currentTimeMillis()+(120*60*1000));
         //When
@@ -102,14 +102,54 @@ public class ParkingDataBaseIT {
 
     @Test
     public void calculateFarRecurrentUserTest() throws Exception {
+        //Given
+            //(first in and out)
         parkingService.processIncomingVehicle();
         outTime.setTime(System.currentTimeMillis()+(120*60*1000));
         parkingService.processExitingVehicle(outTime);
+            //(second in)
         parkingService.processIncomingVehicle();
         outTime.setTime(System.currentTimeMillis()+(180*60*1000));
+        //When
         parkingService.processExitingVehicle(outTime);
         Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
-        //When
+        //Then
         assertEquals(convert.roundDoubleToHundred((3 * Fare.CAR_RATE_PER_HOUR) * 0.95), ticketTest.getPrice());
+    }
+
+    @Test
+    public void calculateFarNonRecurrentUserTest(){
+        //Given
+        parkingService.processIncomingVehicle();
+        outTime.setTime(System.currentTimeMillis()+(180*60*1000));
+        //When
+        parkingService.processExitingVehicle(outTime);
+        Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        //Then
+        assertEquals(convert.roundDoubleToHundred((3 * Fare.CAR_RATE_PER_HOUR)), ticketTest.getPrice());
+    }
+
+    @Test
+    public void calculateFarFreeTimeParkingTest(){
+        //Given
+        parkingService.processIncomingVehicle();
+        outTime.setTime(System.currentTimeMillis()+(20*60*1000));
+        //When
+        parkingService.processExitingVehicle(outTime);
+        Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        //Then
+        assertEquals(0, ticketTest.getPrice());
+    }
+
+    @Test
+    public void calculateFarAYearParkingTimeTest(){
+        //Given
+        parkingService.processIncomingVehicle();
+        outTime.setTime(System.currentTimeMillis()+(365L*24*60*60*1000));
+        //When
+        parkingService.processExitingVehicle(outTime);
+        Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        //Then
+        assertEquals(365*24*Fare.CAR_RATE_PER_HOUR, ticketTest.getPrice());
     }
 }
