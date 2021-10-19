@@ -36,7 +36,7 @@ public class ParkingSpot {
     public void setAvailable(boolean available) {
         isAvailable = available;
     }
-
+/*
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,5 +48,5 @@ public class ParkingSpot {
     @Override
     public int hashCode() {
         return number;
-    }
+    }*/
 }
