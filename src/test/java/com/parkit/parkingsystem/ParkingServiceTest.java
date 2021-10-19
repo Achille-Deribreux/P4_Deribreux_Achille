@@ -6,6 +6,7 @@ import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,8 @@ public class ParkingServiceTest {
     private static ParkingSpotDAO parkingSpotDAO;
     @Mock
     private static TicketDAO ticketDAO;
+    @Mock
+    private static FareCalculatorService fareCalculatorService;
 
     private void processExitingVehicleTestSetup() {
         try {
@@ -47,7 +50,7 @@ public class ParkingServiceTest {
 
             when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
 
-            parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+            parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO, fareCalculatorService);
         } catch (Exception e) {
             e.printStackTrace();
             throw  new RuntimeException("Failed to set up test mock objects");
@@ -65,7 +68,7 @@ public class ParkingServiceTest {
     @Test
     public void getVehichleTypeThrowExceptionTest() {
         when(inputReaderUtil.readSelection()).thenReturn(46);
-        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO);
+        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO, fareCalculatorService);
         assertThrows(IllegalArgumentException.class,  () -> parkingService.getVehichleType());
     }
 
@@ -73,7 +76,7 @@ public class ParkingServiceTest {
     @Test
     public void getVehichleTypeReturnCarTest() {
         when(inputReaderUtil.readSelection()).thenReturn(1);
-        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO);
+        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO, fareCalculatorService);
         assertEquals(ParkingType.CAR,parkingService.getVehichleType());
     }
 
@@ -81,7 +84,7 @@ public class ParkingServiceTest {
     @Test
     public void getVehichleTypeReturnBikeTest() {
         when(inputReaderUtil.readSelection()).thenReturn(2);
-        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO);
+        ParkingService parkingService = new ParkingService(inputReaderUtil,parkingSpotDAO, ticketDAO, fareCalculatorService);
         assertEquals(ParkingType.BIKE,parkingService.getVehichleType());
     }
 }

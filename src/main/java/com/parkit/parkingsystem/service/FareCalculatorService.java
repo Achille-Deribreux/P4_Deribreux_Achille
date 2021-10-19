@@ -1,15 +1,21 @@
 package com.parkit.parkingsystem.service;
 
+import com.parkit.parkingsystem.config.DataBaseConfig;
+import com.parkit.parkingsystem.constants.DBConstants;
 import com.parkit.parkingsystem.constants.Fare;
-import com.parkit.parkingsystem.dao.RecurrentUserDAO;
-import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.util.Convert;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class FareCalculatorService {
     private static final Convert convert = new Convert();
-    public static TicketDAO ticketDAO = new TicketDAO();
-    public static RecurrentUserDAO recurrentUserDAO = new RecurrentUserDAO();
+    private static final Logger logger = LogManager.getLogger("TicketDAO");
+    public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
     public void calculateFare(Ticket ticket){
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
@@ -47,12 +53,28 @@ public class FareCalculatorService {
 
     public int getDiscountRecurrentUser (String vehicleRegNumber){
         int discount;
-        if (recurrentUserDAO.checkIfRecurrentUser(vehicleRegNumber, 1)){
+        if (checkIfRecurrentUser(vehicleRegNumber, 1)){
             discount = 5;
         }
         else {
             discount = 0;
         }
         return discount;
+    }
+
+    public boolean checkIfRecurrentUser(String vehicleRegNumber, int howManyToBeRecurrent){
+        Connection con = null;
+        try {
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(DBConstants.GET_RECCURENT_USER);
+            ps.setString(1,vehicleRegNumber);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() && rs.getInt(1) >= howManyToBeRecurrent;
+        }catch (Exception ex){
+            logger.error("Error saving ticket info",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+        }
+        return false;
     }
 }

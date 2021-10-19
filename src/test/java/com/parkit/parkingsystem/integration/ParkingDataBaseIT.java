@@ -1,13 +1,10 @@
 package com.parkit.parkingsystem.integration;
 
 import com.parkit.parkingsystem.constants.Fare;
-import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
-import com.parkit.parkingsystem.dao.RecurrentUserDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
-import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
@@ -19,15 +16,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.sonatype.guice.bean.binders.ParameterKeys;
 
-import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.util.Date;
 
-import static java.lang.Double.parseDouble;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -37,11 +29,11 @@ public class ParkingDataBaseIT {
     private static final DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     private static ParkingSpotDAO parkingSpotDAO;
     private static TicketDAO ticketDAO;
-    private static RecurrentUserDAO recurrentUserDAO;
     private static DataBasePrepareService dataBasePrepareService;
-    private static final String vehicleRegNumberTest = "1-RSV-008"; //PUT A NUMBER THAT ISN'T IN THE PROD DB
+    private static final String vehicleRegNumberTest = "0123456";
     private static  ParkingService parkingService;
     private static Date outTime;
+    private static FareCalculatorService fareCalculatorService;
 
     @Mock
     private static InputReaderUtil inputReaderUtil;
@@ -51,16 +43,16 @@ public class ParkingDataBaseIT {
         parkingSpotDAO = new ParkingSpotDAO();
         parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
         ticketDAO = new TicketDAO();
-        recurrentUserDAO = new RecurrentUserDAO();
-        recurrentUserDAO.dataBaseConfig = dataBaseTestConfig;
         ticketDAO.dataBaseConfig = dataBaseTestConfig;
         dataBasePrepareService = new DataBasePrepareService();
+        fareCalculatorService = new FareCalculatorService();
+        fareCalculatorService.dataBaseConfig = dataBaseTestConfig;
     }
 
     @BeforeEach
     private void setUpPerTest() throws Exception {
         outTime = new Date();
-        parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO, fareCalculatorService);
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(vehicleRegNumberTest);
         dataBasePrepareService.clearDataBaseEntries();
@@ -105,7 +97,19 @@ public class ParkingDataBaseIT {
         //When
         parkingService.processExitingVehicle(outTime);
         //Then
-        assertTrue(recurrentUserDAO.checkIfRecurrentUser(vehicleRegNumberTest, 1));
+        assertTrue(fareCalculatorService.checkIfRecurrentUser(vehicleRegNumberTest, 1));
     }
-    
+
+    @Test
+    public void calculateFarRecurrentUserTest() throws Exception {
+        parkingService.processIncomingVehicle();
+        outTime.setTime(System.currentTimeMillis()+(120*60*1000));
+        parkingService.processExitingVehicle(outTime);
+        parkingService.processIncomingVehicle();
+        outTime.setTime(System.currentTimeMillis()+(180*60*1000));
+        parkingService.processExitingVehicle(outTime);
+        Ticket ticketTest = ticketDAO.getTicket(vehicleRegNumberTest);
+        //When
+        assertEquals(convert.roundDoubleToHundred((3 * Fare.CAR_RATE_PER_HOUR) * 0.95), ticketTest.getPrice());
+    }
 }
