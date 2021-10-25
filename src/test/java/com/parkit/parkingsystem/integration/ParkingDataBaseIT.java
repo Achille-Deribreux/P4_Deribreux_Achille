@@ -10,7 +10,7 @@ import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.Convert;
 import com.parkit.parkingsystem.util.InputReaderUtil;
-import nl.altindag.log.LogCaptor;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
